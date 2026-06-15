@@ -181,20 +181,21 @@ impl PhotonicTrainer {
 // ============================================================================
 // 5. ML HARDWARE GATEWAY INTERFACE
 // ============================================================================
+// Keep all your previous structs (Complex, MziGate, PhotonicNetworkMesh, PhotonicTrainer) exactly the same.
+// Just scroll to the very bottom and replace your `fn main()` block with this updated dashboard interface:
+
 fn main() {
     println!("=============================================================");
     println!("🧬 TRAINING ENGINE INITIALIZED: OPTICAL NEURAL NETWORK (ONN)");
     println!("=============================================================");
 
-    // Classification Data Targets: ([Input Channels], Output Target Detector Index)
     let machine_learning_dataset = vec![
-        ([0.9, 0.1, 0.0, 0.0], 0), // Pattern A: Route light to Channel 0
-        ([0.8, 0.2, 0.1, 0.0], 0), // Pattern A
-        ([0.0, 0.0, 0.1, 0.9], 3), // Pattern B: Route light to Channel 3
-        ([0.1, 0.0, 0.2, 0.8], 3), // Pattern B
+        ([0.9, 0.1, 0.0, 0.0], 0), 
+        ([0.8, 0.2, 0.1, 0.0], 0), 
+        ([0.0, 0.0, 0.1, 0.9], 3), 
+        ([0.1, 0.0, 0.2, 0.8], 3), 
     ];
 
-    // Instantiate our silicon core with flat baseline default angles
     let initial_mesh = PhotonicNetworkMesh {
         gates: [MziGate::new(1.0, 0.5); 6],
     };
@@ -202,10 +203,11 @@ fn main() {
     println!("Commencing Optical Physical Training Over Silicon Mesh...");
     let trained_mesh = PhotonicTrainer::train(initial_mesh, &machine_learning_dataset, 3000);
 
-    println!("\n--- TRAINING OPERATIONAL CYCLE LOCKED IN ---");
-    println!("Verifying Inference Accuracy on Raw Hardware Patterns:");
+    println!("\n=============================================================");
+    println!("📊 HARDWARE DIAGNOSTICS: PHOTONIC LATTICE VISUALIZER");
+    println!("=============================================================");
 
-    // Run verification on an un-trained evaluation sequence variation
+    // Test Pattern A (Should route cleanly to Channel 0)
     let test_pattern = [0.95, 0.05, 0.0, 0.0];
     let encoded_test = [
         Complex::polar(test_pattern[0], 0.0),
@@ -215,8 +217,28 @@ fn main() {
     ];
     
     let output_light = trained_mesh.forward(encoded_test);
-    println!("\nInput Data Stream injected into Waveguides. Reading Photodetectors:");
-    println!("=> Receiver Port [0] Brightness: {:.4} (Target for Pattern A)", output_light[0].intensity());
-    println!("=> Receiver Port [3] Brightness: {:.4}", output_light[3].intensity());
+    
+    // Calculate intensities for energy routing visualization
+    let i0 = output_light[0].intensity();
+    let i1 = output_light[1].intensity();
+    let i2 = output_light[2].intensity();
+    let i3 = output_light[3].intensity();
+
+    // Helper closure to draw energy density paths visually
+    let draw_beam = |intensity: f64| -> &'static str {
+        if intensity > 0.75 { "========>>" }
+        else if intensity > 0.25 { "-------->" }
+        else { ".........." }
+    };
+
+    println!("Injected Input Laser Matrix: [{:.2}, {:.2}, {:.2}, {:.2}]", test_pattern[0], test_pattern[1], test_pattern[2], test_pattern[3]);
+    println!("\nLattice Propagation Flow Path map:");
+    println!("Ch 0  {0} [MZI 0] {0}-----------{0} [MZI 3] {0}===> Recv 0 Intensity: {1:.4}", draw_beam(test_pattern[0]), i0);
+    println!("                \\                 /");
+    println!("Ch 1  {0}---------[MZI 2] {0}--------                        ===> Recv 1 Intensity: {1:.4}", draw_beam(test_pattern[1]), i1);
+    println!("                          \\                              /");
+    println!("Ch 2  {0}---------[MZI 1] {0}--------                        ===> Recv 2 Intensity: {1:.4}", draw_beam(test_pattern[2]), i2);
+    println!("                /                 \\");
+    println!("Ch 3  {0} [MZI 4] {0}-----------{0} [MZI 5] {0}===> Recv 3 Intensity: {1:.4}", draw_beam(test_pattern[3]), i3);
     println!("=============================================================");
 }
