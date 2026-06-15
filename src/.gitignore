@@ -1,5 +1,0 @@
-# Ignore the local compilation build target directories
-/target/
-
-# Ignore local lock files not needed for the repo root
-**/*.rs.bk
